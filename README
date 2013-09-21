@@ -1,0 +1,9 @@
+Code for the analysis of tic-tac-toe.
+
+* position management
+* various playing strategies
+* symmetry considerations
+* game trees starting from any initial positions
+* graphviz output
+
+Copyright 2013, Bryan Clair.
