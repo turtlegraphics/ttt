@@ -8,6 +8,9 @@ class Position:
     def __init__(self,moves=[]):
         """Create a new position, optionally making the given list
         of tuples, which are moves."""
+        # The only state stored in a position is the actual board.
+        # Everything else (who's move it is, position quality, etc.)
+        # is calculated every time, on the fly.
         self.board = [' ']*9
         for m in moves:
             self.move(m)
@@ -23,6 +26,10 @@ class Position:
     def tomove(self):
         """Return the player whose turn it is."""
         return 'x' if self.board.count(' ') % 2 else 'o'
+
+    def nottomove(self):
+        """Return the player whose turn it is not."""
+        return 'o' if self.board.count(' ') % 2 else 'x'
 
     def move(self,loc):
         """The current player moves in (r,c) = loc."""
@@ -58,15 +65,63 @@ class Position:
         self[r,c] = ' '
         return result
 
+    def evaluatemove(self,move):
+        """
+        Return an evaluation of the move m in this position.
+        Returns 'x' or 'o' if 'x' or 'o' can force a win, None if drawn.
+        """
+        (r,c) = move
+        self[r,c] = self.tomove()
+        result = self.evaluate()
+        self[r,c] = ' '
+        return result
+
+    def evaluate(self):
+        """
+        Return an evaluation of this position with best play by both sides.
+        Returns 'x' or 'o' if 'x' or 'o' can force a win, None if drawn.
+        """
+        possibleMoves = self.moves(strategy='legal')
+        if not possibleMoves:
+            if self.win('x'):
+                return 'x'
+            if self.win('o'):
+                return 'o'
+            return None  # draw
+
+        best = self.nottomove()
+        who = self.tomove()
+        for m in possibleMoves:
+            score = self.evaluatemove(m)
+            if score == who:
+                return score
+            if score == None:
+                best = None
+        return best
+
+    """A list of strategies implemented in moves() function."""
+    strategies = {
+           'all' :
+               """All empty squares, even if the game is over.""",
+           'legal' :
+               """Any empty square, unless one player has already won.""",
+           'winblock' :
+               """Any move which wins, if possible,
+                      else any move which blocks, if possible,
+                      else legal.""",
+           'heuristic' :
+               """Any move which wins, if possible,
+                      else any move which blocks, if possible,
+                      else play in the center, else any corner,
+                      else any legal move.""",
+           'rational' :
+               """All optimal moves, assuming opponent is also rational."""
+           }
+
     def moves(self,strategy='legal'):
         """Return a list of possible moves, given as tuples.
-           Only take moves according to strategy:
-           all :  All empty squares, even if the game is over.
-           legal : Any empty square, unless one player has already won.
-           winblock : Any move which wins, if possible,
-                      else any move which blocks, if possible,
-                      else legal.
-           To use winblock, need to specify 'x' or 'o' as who will move."""
+           Only take moves according to given strategy."""
+        assert(strategy in Position.strategies)
 
         if strategy != 'all':
             # check if game is already over
@@ -79,6 +134,23 @@ class Position:
             for col in range(3):
                 if self[row,col] == ' ':
                     moves.append((row,col))
+
+        if strategy == 'rational':
+            outcomes = [self.evaluatemove(m) for m in moves]
+            if self.tomove() in outcomes:            
+                # player can win
+                best = self.tomove()
+            elif None in outcomes:
+                # it's a draw
+                best = None
+            else:
+                # player will lose
+                best = self.nottomove()
+            bestmoves = []
+            for i in range(len(moves)):
+                if outcomes[i] == best:
+                    bestmoves.append(moves[i])
+            return bestmoves
 
         if strategy == 'winblock' or strategy == 'heuristic':
             who = self.tomove()
@@ -291,7 +363,6 @@ if __name__=='__main__':
         assert(b.win('x'))
         print 'x has won!'
 
-
     def symmetrytest():
         print '='*20
         print 'Test Position class symmetry operations.'
@@ -308,7 +379,52 @@ if __name__=='__main__':
         print 'standard symmetry rep of this board'
         print b
 
-    p = Position()
-    thetree = GameTree(9,positions=[p],strategy={'x':'winblock','o':'heuristic'})
-    #print ' + '.join(map(str,thetree.sizes())) + ' = ' + str(sum(thetree.sizes()))    
-    thetree.dotrepr()
+    def evaltest():
+        print '='*20
+        print 'Test Position class evaluation operations.'
+
+        for b in [
+            Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] ),
+            Position( [(0,0),(1,0),(1,1),(2,2),(2,0)] ),
+            Position( [(1,1),(0,0),(2,0),(0,2),(0,1),(2,1)] ),
+            Position( [(1,1),(0,0),(2,0),(0,2),(0,1),(2,1),(2,2)] ),
+            Position( [(1,1),(0,1)] ),
+            Position( [(0,0),(0,1)] ),
+            Position( [(1,1),(0,0)] ),
+            Position( [(0,0),(1,1)] ),
+            Position( [(1,0)] )
+            ]:
+            print
+            print b,
+            print 'is a win for', b.evaluate()
+
+        b = Position( [(0,0)] )
+        print
+        print 'In this position:'
+        print b
+        for omove in [ (1,0), (1,1), (2,1), (2,2) ]:
+            print 'o moves ',omove,
+            print 'is a win for', b.evaluatemove(omove)
+
+    def movestest():
+        print '='*20
+        print 'Test Position class evaluation operations.'
+        for b in [
+            Position( [(1,1)] ),
+            Position( [(0,0)] ),
+            Position( [(0,0),(1,1),(2,2)] ),
+            Position( [(0,0),(1,1),(2,2),(0,2)] ),
+            Position( [(0,0),(1,1),(2,2),(0,2),(1,0),(2,0)] ),
+            ]:
+            print
+            print '='*30
+            print 'In this position:'
+            print b
+            for s in Position.strategies:
+                print
+                print '-'*20
+                print "Strategy '%s':" % s
+                print Position.strategies[s]
+                print b.moves(strategy=s)
+
+    movestest()
