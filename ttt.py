@@ -344,87 +344,97 @@ class GameTree:
         print '}'
 
 if __name__=='__main__':
-    def postest():
-        print '='*20
-        print 'Test Position class'
-        b = Position([ (0,0), (1,1), (2,2), (0,2) ])
-        print b
-        print 'possible moves:'
-        print b.moves()
-        print 'move (2,0)'
-        b[2,0] = 'x'
-        print b
-        print 'move (1,0)'
-        b[1,0] = 'o'
-        print b
-        print 'move (2,1)'
-        b[2,1] = 'x'
-        print b
-        assert(b.win('x'))
-        print 'x has won!'
+    class Tests:
+        def postest():
+            """Basic operation of the Position class"""
+            b = Position([ (0,0), (1,1), (2,2), (0,2) ])
+            print b
+            print 'possible moves:'
+            print b.moves()
+            print 'move (2,0)'
+            b[2,0] = 'x'
+            print b
+            print 'move (1,0)'
+            b[1,0] = 'o'
+            print b
+            print 'move (2,1)'
+            b[2,1] = 'x'
+            print b
+            assert(b.win('x'))
+            print 'x has won!'
 
-    def symmetrytest():
-        print '='*20
-        print 'Test Position class symmetry operations.'
-        b = Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] )
-        print 'board'
-        print b
-        b.rowflip()
-        print 'board flipped horizontally'
-        print b
-        b.diagflip()
-        print 'diagonally flip that one (rotation of original)'
-        print b
-        b.standardize()
-        print 'standard symmetry rep of this board'
-        print b
+        def symmetrytest():
+            """Position class symmetry operations."""
+            b = Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] )
+            print 'board'
+            print b
+            b.rowflip()
+            print 'board flipped horizontally'
+            print b
+            b.diagflip()
+            print 'diagonally flip that one (rotation of original)'
+            print b
+            b.standardize()
+            print 'standard symmetry rep of this board'
+            print b
 
-    def evaltest():
-        print '='*20
-        print 'Test Position class evaluation operations.'
+        def evaltest():
+            """Position class evaluation operations."""
+            for b in [
+                Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] ),
+                Position( [(0,0),(1,0),(1,1),(2,2),(2,0)] ),
+                Position( [(1,1),(0,0),(2,0),(0,2),(0,1),(2,1)] ),
+                Position( [(1,1),(0,0),(2,0),(0,2),(0,1),(2,1),(2,2)] ),
+                Position( [(1,1),(0,1)] ),
+                Position( [(0,0),(0,1)] ),
+                Position( [(1,1),(0,0)] ),
+                Position( [(0,0),(1,1)] ),
+                Position( [(1,0)] )
+                ]:
+                print
+                print b,
+                print 'is a win for', b.evaluate()
 
-        for b in [
-            Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] ),
-            Position( [(0,0),(1,0),(1,1),(2,2),(2,0)] ),
-            Position( [(1,1),(0,0),(2,0),(0,2),(0,1),(2,1)] ),
-            Position( [(1,1),(0,0),(2,0),(0,2),(0,1),(2,1),(2,2)] ),
-            Position( [(1,1),(0,1)] ),
-            Position( [(0,0),(0,1)] ),
-            Position( [(1,1),(0,0)] ),
-            Position( [(0,0),(1,1)] ),
-            Position( [(1,0)] )
-            ]:
+            b = Position( [(0,0)] )
             print
-            print b,
-            print 'is a win for', b.evaluate()
-
-        b = Position( [(0,0)] )
-        print
-        print 'In this position:'
-        print b
-        for omove in [ (1,0), (1,1), (2,1), (2,2) ]:
-            print 'o moves ',omove,
-            print 'is a win for', b.evaluatemove(omove)
-
-    def movestest():
-        print '='*20
-        print 'Test Position class evaluation operations.'
-        for b in [
-            Position( [(1,1)] ),
-            Position( [(0,0)] ),
-            Position( [(0,0),(1,1),(2,2)] ),
-            Position( [(0,0),(1,1),(2,2),(0,2)] ),
-            Position( [(0,0),(1,1),(2,2),(0,2),(1,0),(2,0)] ),
-            ]:
-            print
-            print '='*30
             print 'In this position:'
             print b
-            for s in Position.strategies:
-                print
-                print '-'*20
-                print "Strategy '%s':" % s
-                print Position.strategies[s]
-                print b.moves(strategy=s)
+            for omove in [ (1,0), (1,1), (2,1), (2,2) ]:
+                print 'o moves ',omove,
+                print 'is a win for', b.evaluatemove(omove)
 
-    movestest()
+        def movestest():
+            """Position class move generation."""
+            for b in [
+                Position( [(1,1)] ),
+                Position( [(0,0)] ),
+                Position( [(0,0),(1,1),(2,2)] ),
+                Position( [(0,0),(1,1),(2,2),(0,2)] ),
+                Position( [(0,0),(1,1),(2,2),(0,2),(1,0),(2,0)] ),
+                ]:
+                print
+                print '='*30
+                print 'In this position:'
+                print b
+                for s in Position.strategies:
+                    print
+                    print '-'*20
+                    print "Strategy '%s':" % s
+                    print Position.strategies[s]
+                    print b.moves(strategy=s)
+
+    from sys import exit
+    tests = [t for t in Tests.__dict__ if callable(Tests.__dict__[t])]
+    while True:
+        i = 0
+        for t in tests:
+            print i,')',t,':',Tests.__dict__[t].__doc__
+            i += 1
+        try:
+            number = int(raw_input('choose a test:'))
+            choice = tests[number]
+        except:
+            exit()
+        print '*'*15,choice,'*'*15
+        Tests.__dict__[choice]()
+        print '*'*(32+len(choice))
