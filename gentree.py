@@ -20,7 +20,17 @@ class Trees:
         """Both players using the heuristic strategy (win, block, center,
         corner).  Most games go like this."""
         return ttt.GameTree(levels=9,strategy='heuristic')
-
+    def beatChildren():
+        """X plays rational, O plays the heuristic strategy."""
+        return ttt.GameTree(levels=9,strategy={'x':'rational','o':'heuristic'})
+    def canHeuristicLose():
+        """X plays heuristic.  Is it possible to lose?"""
+        return ttt.GameTree(levels=9,strategy={'x':'heuristic','o':'legal'})
+    def centerThenWinblock():
+        """X plays in the center, then just plays winblock strategy."""
+        return ttt.GameTree(levels=8,strategy={'x':'winblock','o':'rational'},
+                            positions = [ttt.Position( [(1,1)] )])
+        
 mytrees = [t for t in dir(Trees) if callable(Trees.__dict__[t])]
 
 def usage():
