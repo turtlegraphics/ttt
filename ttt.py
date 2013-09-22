@@ -306,17 +306,18 @@ class GameTree:
             print
 
     def dotrepr(self):
-        """Produce a representation of the game tree as a graphviz dot file."""
-        print 'digraph G {'
-        print 'graph [ranksep=3, rankdir="LR"];'
-        print 'node [shape=record, fontname="monaco",margin=0];'
+        """Return a representation of the game tree as a graphviz dot file."""
+        out = ''
+        out += 'digraph G {\n'
+        out += 'graph [ranksep=3, rankdir="LR"];\n'
+        out += 'node [shape=record, fontname="monaco",margin=0];\n'
         
         def nodestyle(color):
             return ',color="%s",fontcolor="%s"' % (color,color)
 
         fontsize = [48,48,24,14,14,14,14,14,24,48]
         for level in range(len(self.vertices)):
-            print '/* Level %d */' % level
+            out += '/* Level %d */\n' % level
             for i in range(len(self.vertices[level])):
                 v = self.vertices[level][i]
                 vdesc = 'V'+ str(i) + 'L' + str(level)
@@ -328,20 +329,20 @@ class GameTree:
                     vdesc += nodestyle('red')
                 elif v.drawn():
                     vdesc += nodestyle('green')
-                vdesc += '];'
-                print vdesc
+                vdesc += '];\n'
+                out += vdesc
 
         for level in range(len(self.links)):
-            print '/* Level %d */' % level
+            out += '/* Level %d */\n' % level
             for i in range(len(self.vertices[level])):
                 for c in self.links[level][i]:
                     ldesc = 'V' + str(i) + 'L' + str(level)
                     ldesc += ' -> '
                     ldesc += 'V' + str(c) + 'L' + str(level + 1)
-                    ldesc += ';'
-                    print ldesc
-
-        print '}'
+                    ldesc += ';\n'
+                    out += ldesc
+        out += '}'
+        return out
 
 if __name__=='__main__':
     class Tests:
