@@ -51,4 +51,5 @@ thetree = Trees.__dict__[t]()
 print thetree.dotrepr()
 print >> sys.stderr, t,':',Trees.__dict__[t].__doc__
 for stat,value in thetree.stats().iteritems():
-    print >> sys.stderr, "%9s : " % stat,value
+    print >> sys.stderr, stat
+    print >> sys.stderr, value
