@@ -289,6 +289,22 @@ class GameTree:
         vals = dict()
         vals['vertlist'] = map(len,self.vertices)
         vals['vertices'] = sum(vals['vertlist'])
+
+        # Build count of games
+        gamecounts = [1]*len(self.vertices[-1])
+        for level in range( len(self.vertices)-2, -1, -1 ):
+            newcounts = []
+            for children in self.links[level]:
+                if children:
+                    games = 0
+                    for i in children:
+                        games += gamecounts[i]
+                else:
+                    games = 1
+                newcounts.append(games)
+            gamecounts = newcounts
+        vals['games'] = sum(gamecounts)
+
         return vals
 
     def display(self):
