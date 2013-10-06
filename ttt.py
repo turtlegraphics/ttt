@@ -280,9 +280,16 @@ class GameTree:
         self.links.append(moves)
         self.vertices.append(found)
 
-    def sizes(self):
-        """Return a list of the nubmer of nodes at each level."""
-        return map(len,self.vertices)
+    def stats(self):
+        """Return a dictionary with various statistics about the tree.
+        Entries are:
+        vertices - total number of vertices
+        vertlist - list of vertices at each level of the tree
+        """
+        vals = dict()
+        vals['vertlist'] = map(len,self.vertices)
+        vals['vertices'] = sum(vals['vertlist'])
+        return vals
 
     def display(self):
         """Print an ascii text representation of the tree."""
@@ -346,7 +353,7 @@ class GameTree:
 
 if __name__=='__main__':
     class Tests:
-        def postest():
+        def pos():
             """Basic operation of the Position class"""
             b = Position([ (0,0), (1,1), (2,2), (0,2) ])
             print b
@@ -364,7 +371,7 @@ if __name__=='__main__':
             assert(b.win('x'))
             print 'x has won!'
 
-        def symmetrytest():
+        def symmetry():
             """Position class symmetry operations."""
             b = Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] )
             print 'board'
@@ -379,7 +386,7 @@ if __name__=='__main__':
             print 'standard symmetry rep of this board'
             print b
 
-        def evaltest():
+        def eval():
             """Position class evaluation operations."""
             for b in [
                 Position( [(0,0),(1,0),(1,1),(2,2),(0,2)] ),
@@ -404,7 +411,7 @@ if __name__=='__main__':
                 print 'o moves ',omove,
                 print 'is a win for', b.evaluatemove(omove)
 
-        def movestest():
+        def moves():
             """Position class move generation."""
             for b in [
                 Position( [(1,1)] ),
@@ -424,6 +431,15 @@ if __name__=='__main__':
                     print Position.strategies[s]
                     print b.moves(strategy=s)
 
+        def stats():
+            """Find statistics from a game tree."""
+            t = GameTree(levels=6,strategy={'x':'rational','o':'rational'},
+                            positions = [ Position( [(0,0),(1,1),(1,2)] )])
+            stat = t.stats()
+            print 'Stats are for stat-test-tree.pdf.  Both players rational.'
+            for key in stat:
+                print key,'\t', stat[key]
+            
     from sys import exit
     tests = [t for t in Tests.__dict__ if callable(Tests.__dict__[t])]
     while True:
