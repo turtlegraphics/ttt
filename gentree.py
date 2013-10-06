@@ -9,12 +9,12 @@ import ttt
 
 class Trees:
     def rational():
-        """Tree of all rational moves, up to symmetry.  This is all possible
-           well-played games of Tic-Tac-Toe will go."""
+        """Tree of all rational moves, up to symmetry.  This is how all
+           possible well-played games of Tic-Tac-Toe will go."""
         return ttt.GameTree(levels=9,strategy='rational')
     def legal():
-        """Tree of all legal moves, up to symmetry.  This is all possible
-           games Tic-Tac-Toe will go."""
+        """Tree of all legal moves, up to symmetry.  This is how all
+           possible games Tic-Tac-Toe will go."""
         return ttt.GameTree(levels=9,strategy='legal')
     def heuristic():
         """Both players using the heuristic strategy (win, block, center,
@@ -50,4 +50,5 @@ if t not in mytrees:
 thetree = Trees.__dict__[t]()
 print thetree.dotrepr()
 print >> sys.stderr, t,':',Trees.__dict__[t].__doc__
-print >> sys.stderr, thetree.stats()
+for stat,value in thetree.stats().iteritems():
+    print >> sys.stderr, "%9s : " % stat,value
