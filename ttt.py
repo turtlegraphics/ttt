@@ -228,6 +228,9 @@ def positionListString(plist):
 
 class GameTree:
     """Generate a game tree accounting for symmetry."""
+    # I need to totally re-write this.  Make a 'Node' class which contains
+    # a position and info about that position, such as output name, interest
+    # level, links, etc.  This crazy C-like double array business is awful.
     def __init__(self,levels=0, positions=None, strategy='legal'):
         """Create a tree that starts with the given positions (or the empty
         board, by default), and which has the given number of levels.
@@ -290,20 +293,41 @@ class GameTree:
         vals['vertlist'] = map(len,self.vertices)
         vals['vertices'] = sum(vals['vertlist'])
 
-        # Build count of games
+        # Build count of games & find most interesting links
         gamecounts = [1]*len(self.vertices[-1])
+        bestlinks = [ [] for l  in self.links]
         for level in range( len(self.vertices)-2, -1, -1 ):
             newcounts = []
             for children in self.links[level]:
+                bestv = 0
+                bestl = []
                 if children:
                     games = 0
                     for i in children:
                         games += gamecounts[i]
+                        if gamecounts[i] == bestv:
+                            bestl.append(i)
+                        elif gamecounts[i] > bestv:
+                            bestv = gamecounts[i]
+                            bestl = [i]
                 else:
                     games = 1
                 newcounts.append(games)
+                bestlinks[level].append(bestl)
             gamecounts = newcounts
+
+        # Total number of games
         vals['games'] = sum(gamecounts)
+    
+        # Find the most interesting game
+        besti = gamecounts.index(max(gamecounts))
+        bestgame = [self.vertices[0][besti]]
+        level = 0
+        while level < len(self.links):
+            besti = bestlinks[level][besti][0]  # just use first bestlink
+            level += 1
+            bestgame.append(self.vertices[level][besti])
+        vals['bestgame'] = positionListString(bestgame)
 
         return vals
 
@@ -454,7 +478,8 @@ if __name__=='__main__':
             stat = t.stats()
             print 'Stats are for stat-test-tree.pdf.  Both players rational.'
             for key in stat:
-                print key,'\t', stat[key]
+                print key
+                print stat[key]
             
     from sys import exit
     tests = [t for t in Tests.__dict__ if callable(Tests.__dict__[t])]
