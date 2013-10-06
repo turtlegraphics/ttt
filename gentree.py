@@ -49,3 +49,5 @@ if t not in mytrees:
 
 thetree = Trees.__dict__[t]()
 print thetree.dotrepr()
+print >> sys.stderr, t,':',Trees.__dict__[t].__doc__
+print >> sys.stderr, thetree.stats()
